@@ -2,12 +2,11 @@ import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 
-import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
-  let user = useUser();
+  const user = useUser();
   //bg-gradient-to-b from-[#2e026d] to-[#15162c]
   return (
     <>
