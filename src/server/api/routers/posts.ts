@@ -1,5 +1,6 @@
 import type { User } from "@clerk/nextjs/dist/api";
 import { clerkClient } from "@clerk/nextjs/server";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 function filterUserInfos(user: User) {
@@ -24,12 +25,25 @@ export const postsRouter = createTRPCRouter({
       })
     ).map(filterUserInfos);
 
-    console.info(users);
+    // console.info(users);
 
     return posts.map((post) => {
+      const author = users.find((user) => user.id === post.authorId);
+
+      if (!author || !author.username)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "author does not exsist",
+        });
+
+      const username = author.username;
+
       return {
         post,
-        auther: users.find((user) => user.id === post.authorId),
+        author: {
+          ...author,
+          username,
+        },
       };
     });
   }),

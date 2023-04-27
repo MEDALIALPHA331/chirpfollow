@@ -1,13 +1,17 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { api } from "~/utils/api";
+import { RouterOutputs, api } from "~/utils/api";
+
+dayjs.extend(relativeTime);
 
 const CreatePostWizzard = () => {
   const { user } = useUser();
 
-  console.log(user);
+  // console.log(user);
 
   if (!user) return null;
 
@@ -75,13 +79,8 @@ const Home: NextPage = () => {
             {isLoading ? (
               <div>Loading...</div>
             ) : (
-              postsData?.map(({ auther, post }) => {
-                return (
-                  <div key={post.id} className="border-b border-slate-400 p-2">
-                    <span>{post.content}</span>
-                    <span>By: {auther?.username}</span>
-                  </div>
-                );
+              postsData?.map((post) => {
+                return <PostView key={post.post.id} PostWithUser={post} />;
               })
             )}
           </div>
@@ -92,3 +91,28 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+type PostWithUser = RouterOutputs["posts"]["getAll"][number];
+
+const PostView = (props: { PostWithUser: PostWithUser }) => {
+  const {
+    PostWithUser: { author, post },
+  } = props;
+  return (
+    <div className="flex items-center justify-start gap-6 border-b border-slate-400  px-2 md:py-4">
+      <Image
+        alt={`${author.username} profile picture`}
+        src={author.profileImageUrl}
+        width={48}
+        height={48}
+        className="rounded-full"
+      />
+      <div className="flex flex-col items-start justify-center">
+        <span className="text-xs text-slate-400">
+          @{author.username} - {dayjs(post.createdAt).fromNow()}
+        </span>
+        <span className="text-xl">{post.content}</span>
+      </div>
+    </div>
+  );
+};
