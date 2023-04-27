@@ -7,10 +7,12 @@ import { api } from "~/utils/api";
 const CreatePostWizzard = () => {
   const { user } = useUser();
 
+  console.log(user);
+
   if (!user) return null;
 
   return (
-    <div className="flex  items-center justify-between">
+    <div className="flex items-center gap-5">
       <Image
         src={user.profileImageUrl}
         alt="user profile image"
@@ -19,8 +21,14 @@ const CreatePostWizzard = () => {
         className="rounded-full"
       />
 
+      <input
+        type="text"
+        className="flex-grow border-none bg-transparent text-slate-400 outline-none"
+        placeholder="Type Some Emojis!"
+      />
+
       <SignOutButton>
-        <button className="rounded-lg bg-slate-200 px-4 py-2 text-black">
+        <button className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black">
           Sing Out
         </button>
       </SignOutButton>
@@ -67,11 +75,11 @@ const Home: NextPage = () => {
             {isLoading ? (
               <div>Loading...</div>
             ) : (
-              postsData?.map((post) => {
+              postsData?.map(({ auther, post }) => {
                 return (
-                  <div key={post.id}>
+                  <div key={post.id} className="border-b border-slate-400 p-2">
                     <span>{post.content}</span>
-                    <span>By: {post.authorId}</span>
+                    <span>By: {auther?.username}</span>
                   </div>
                 );
               })

@@ -21,6 +21,7 @@ const config = {
   plugins: ["@typescript-eslint"],
   extends: ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   rules: {
+    //TODO: Remove this rule later
     "react-hooks/rules-of-hooks": "off",
     "@typescript-eslint/consistent-type-imports": [
       "warn",
