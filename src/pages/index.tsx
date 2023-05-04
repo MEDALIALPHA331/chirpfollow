@@ -4,14 +4,13 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import LoadingSpinner from "~/components/Loading";
 import { RouterOutputs, api } from "~/utils/api";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizzard = () => {
   const { user } = useUser();
-
-  // console.log(user);
 
   if (!user) return null;
 
@@ -40,17 +39,39 @@ const CreatePostWizzard = () => {
   );
 };
 
+function LoadingScreen() {
+  return (
+    <div className="absolute left-0 top-0 grid h-screen w-screen place-content-center">
+      <LoadingSpinner size={60} />
+    </div>
+  );
+}
+
+const Feed = () => {
+  const { data: postsData, isLoading: postLoading } =
+    api.posts.getAll.useQuery();
+
+  if (postLoading) return <LoadingScreen />;
+
+  if (!postsData) return <h1>Something went wrong!</h1>;
+
+  return (
+    <div className="flex flex-col">
+      {postsData?.map((post) => {
+        return <PostView key={post.post.id} PostWithUser={post} />;
+      })}
+    </div>
+  );
+};
+
 const Home: NextPage = () => {
-  const { data: postsData, isLoading } = api.posts.getAll.useQuery();
+  //start fetching asap
+  api.posts.getAll.useQuery();
 
-  if (!postsData)
-    return (
-      <div className="grid h-screen w-full place-content-center text-4xl">
-        Loading Data
-      </div>
-    );
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
-  const user = useUser();
+  //empty div when the user is not loaded
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -62,7 +83,7 @@ const Home: NextPage = () => {
       <main className="flex min-h-screen flex-col items-center justify-center">
         <div className="h-screen w-full border-x border-slate-400 md:max-w-2xl">
           <div className="min-h-[70px] border-b border-slate-400 p-4">
-            {user.isSignedIn ? (
+            {isSignedIn ? (
               <CreatePostWizzard />
             ) : (
               <div className="flex justify-center">
@@ -75,15 +96,7 @@ const Home: NextPage = () => {
             )}
           </div>
 
-          <div>
-            {isLoading ? (
-              <div>Loading...</div>
-            ) : (
-              postsData?.map((post) => {
-                return <PostView key={post.post.id} PostWithUser={post} />;
-              })
-            )}
-          </div>
+          <Feed />
         </div>
       </main>
     </>
