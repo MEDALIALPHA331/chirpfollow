@@ -33,11 +33,11 @@ export const createTRPCContext = (opts: CreateNextContextOptions) => {
   //because clerk use JWTs to veriy on the our server if the user is authed or not using the signiture of the jwt, allowing them to skip a callback to their server just to know if the use is signed in or not.
   const sesh = getAuth(req);
 
-  const user = sesh.user;
+  const userId = sesh.userId;
 
   return {
     prisma,
-    currentUser: user,
+    userId,
   };
 };
 
@@ -92,13 +92,13 @@ export const publicProcedure = t.procedure;
 
 //extend the public procedure with a tRPC middleware, a process that runs yout main request processing (not like nextjs middleware)
 const enforceUserAuthed = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.currentUser) {
+  if (!ctx.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return next({
     ctx: {
-      currentUser: ctx.currentUser,
+      userId: ctx.userId,
     },
   });
 });

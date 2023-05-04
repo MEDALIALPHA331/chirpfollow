@@ -4,6 +4,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { useState } from "react";
 import LoadingSpinner from "~/components/Loading";
 import { RouterOutputs, api } from "~/utils/api";
 
@@ -11,6 +12,10 @@ dayjs.extend(relativeTime);
 
 const CreatePostWizzard = () => {
   const { user } = useUser();
+
+  const [input, setInput] = useState("");
+
+  const { mutate } = api.posts.create.useMutation();
 
   if (!user) return null;
 
@@ -28,7 +33,16 @@ const CreatePostWizzard = () => {
         type="text"
         className="flex-grow border-none bg-transparent text-slate-400 outline-none"
         placeholder="Type Some Emojis!"
+        onChange={(e) => setInput(e.target.value)}
       />
+
+      <button
+        onClick={() => mutate({ content: input })}
+        type="submit"
+        className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black"
+      >
+        Post
+      </button>
 
       <SignOutButton>
         <button className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black">
