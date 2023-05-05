@@ -20,9 +20,15 @@ const CreatePostWizzard = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
+
       void ctx.posts.getAll.invalidate();
     },
   });
+
+  function postMutation() {
+    mutate({ content: input });
+    setInput("");
+  }
 
   if (!user) return null;
 
@@ -41,11 +47,12 @@ const CreatePostWizzard = () => {
         className="flex-grow border-none bg-transparent text-slate-400 outline-none"
         placeholder="Type Some Emojis!"
         onChange={(e) => setInput(e.target.value)}
+        value={input}
         disabled={isPosting}
       />
 
       <button
-        onClick={() => mutate({ content: input })}
+        onClick={postMutation}
         type="submit"
         className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black"
       >
