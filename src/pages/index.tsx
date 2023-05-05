@@ -20,15 +20,9 @@ const CreatePostWizzard = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
-
       void ctx.posts.getAll.invalidate();
     },
   });
-
-  function postMutation() {
-    mutate({ content: input });
-    setInput("");
-  }
 
   if (!user) return null;
 
@@ -52,7 +46,7 @@ const CreatePostWizzard = () => {
       />
 
       <button
-        onClick={postMutation}
+        onClick={() => mutate({ content: input })}
         type="submit"
         className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black"
       >
@@ -110,7 +104,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
-        <div className="h-screen w-full border-x border-slate-400 md:max-w-2xl">
+        <div className="min-h-screen w-full border-x border-slate-400 md:max-w-2xl">
           <div className="min-h-[70px] border-b border-slate-400 p-4">
             {isSignedIn ? (
               <CreatePostWizzard />
