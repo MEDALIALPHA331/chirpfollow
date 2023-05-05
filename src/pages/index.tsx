@@ -5,6 +5,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 import LoadingSpinner from "~/components/Loading";
 import { RouterOutputs, api } from "~/utils/api";
 
@@ -21,10 +22,30 @@ const CreatePostWizzard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
+      toast.success("Posted", {
+        position: "bottom-center",
+        duration: 2000,
+      });
+    },
+
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0], {
+          position: "bottom-center",
+          duration: 2000,
+        });
+      }
     },
   });
 
   if (!user) return null;
+
+  function executeMutation() {
+    mutate({ content: input });
+    setInput(""); //set it asap
+  }
 
   return (
     <div className="flex items-center gap-5">
@@ -43,15 +64,28 @@ const CreatePostWizzard = () => {
         onChange={(e) => setInput(e.target.value)}
         value={input}
         disabled={isPosting}
+        onKeyDown={(e) => {
+          e.preventDefault();
+          if (input) executeMutation();
+        }}
       />
 
-      <button
-        onClick={() => mutate({ content: input })}
-        type="submit"
-        className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black"
-      >
-        Post
-      </button>
+      {input && !isPosting && (
+        <button
+          onClick={executeMutation}
+          type="submit"
+          disabled={isPosting}
+          className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black"
+        >
+          Post
+        </button>
+      )}
+
+      {isPosting && (
+        <div className="ml-auto rounded-lg  px-2 py-1 text-black">
+          <LoadingSpinner size={20} />
+        </div>
+      )}
 
       <SignOutButton>
         <button className="ml-auto rounded-lg bg-slate-200 px-2 py-1 text-black">
