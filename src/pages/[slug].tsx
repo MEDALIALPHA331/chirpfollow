@@ -1,5 +1,6 @@
-import { GetStaticPropsContext, type NextPage } from "next";
+import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
 import Head from "next/head";
+
 import { api } from "~/utils/api";
 
 const ProfilePage: NextPage = () => {
@@ -24,6 +25,12 @@ const ProfilePage: NextPage = () => {
   );
 };
 
+export default ProfilePage;
+
+/**
+ * @see https://trpc.io/docs/nextjs/ssg
+ */
+
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
 import { appRouter } from "~/server/api/root";
@@ -35,21 +42,27 @@ export async function getStaticProps(
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: { prisma, userId: null },
-    transformer: superjson,
+    transformer: superjson, // optional - adds superjson serialization
   });
+  const slug = context.params?.slug as string;
 
-  const slug = context.params?.slug;
+  const username = slug.replace("@", "");
 
-  if (typeof slug != "string") throw new Error("No Slug");
-
-  //fetch data from trpc and hydrate it via getStaticProps
-  await helpers.profiles.getUserByUsername.prefetch({ username: slug });
+  // prefetch `post.byId`
+  helpers.profiles.getUserByUsername.prefetch({ username });
 
   return {
     props: {
-      rpcState: helpers.dehydrate(),
+      trpcState: helpers.dehydrate(),
+      username,
     },
+    revalidate: 1,
   };
 }
-
-export default ProfilePage;
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    // https://nextjs.org/docs/pages/api-reference/functions/get-static-paths#fallback-blocking
+    fallback: "blocking",
+  };
+};

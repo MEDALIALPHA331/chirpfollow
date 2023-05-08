@@ -107,6 +107,7 @@ const CreatePostWizzard = () => {
         onChange={(e) => setInput(e.target.value)}
         value={input}
         disabled={isPosting}
+        //! On any Key press it will post
         onKeyDown={(e) => {
           e.preventDefault();
           if (input) executeMutation();
