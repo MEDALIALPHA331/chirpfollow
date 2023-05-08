@@ -8,6 +8,24 @@ import Head from "next/head";
 import Image from "next/image";
 import { api } from "~/utils/api";
 
+const ProfileFeed = (props: { userId: string }) => {
+  const { data: profileData, isLoading } = api.posts.getPostsByUserId.useQuery({
+    userid: props.userId,
+  });
+
+  if (isLoading) return <LoadingScreen />;
+
+  if (!profileData || !profileData.length) return <div></div>;
+
+  return (
+    <div className="flex flex-col">
+      {profileData.map((postData) => {
+        return <PostView PostWithUser={postData} key={postData.post.id} />;
+      })}
+    </div>
+  );
+};
+
 type PageProps = InferGetStaticPropsType<typeof getStaticProps>;
 
 const ProfilePage: NextPage<PageProps> = ({ username }) => {
@@ -38,6 +56,8 @@ const ProfilePage: NextPage<PageProps> = ({ username }) => {
           <h2 className="text-2xl">{`@${userProfile?.username}`}</h2>
         </div>
         <div className="w-full border-b border-slate-400" />
+
+        <ProfileFeed userId={userProfile?.id!} />
       </PageLayout>
     </>
   );
@@ -53,8 +73,10 @@ export default ProfilePage;
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
 import PageLayout from "~/components/Layout";
+import PostView from "~/components/PostView";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
+import { LoadingScreen } from ".";
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ slug: string }>
