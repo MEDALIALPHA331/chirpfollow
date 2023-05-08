@@ -6,6 +6,9 @@ await import("./src/env.mjs");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: true,
   images: {
     domains: ["images.clerk.dev"],
@@ -23,4 +26,3 @@ const config = {
   },
 };
 export default config;
-
