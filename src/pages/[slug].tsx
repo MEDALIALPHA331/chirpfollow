@@ -1,13 +1,18 @@
-import type { GetStaticPaths, GetStaticPropsContext, NextPage } from "next";
+import type {
+  GetStaticPaths,
+  GetStaticPropsContext,
+  InferGetStaticPropsType,
+  NextPage,
+} from "next";
 import Head from "next/head";
-
 import { api } from "~/utils/api";
 
-const ProfilePage: NextPage = () => {
-  const { data: userProfile, isLoading: LoadingProfile } =
-    api.profiles.getUserByUsername.useQuery({
-      username: "medalialpha331",
-    });
+type PageProps = InferGetStaticPropsType<typeof getStaticProps>;
+
+const ProfilePage: NextPage<PageProps> = ({ username }) => {
+  const { data: userProfile } = api.profiles.getUserByUsername.useQuery({
+    username,
+  });
 
   return (
     <>
@@ -28,6 +33,7 @@ const ProfilePage: NextPage = () => {
 export default ProfilePage;
 
 /**
+ *  Prefetching data for the dynamic page from tRPC using GetStaticProps
  * @see https://trpc.io/docs/nextjs/ssg
  */
 
@@ -42,13 +48,13 @@ export async function getStaticProps(
   const helpers = createServerSideHelpers({
     router: appRouter,
     ctx: { prisma, userId: null },
-    transformer: superjson, // optional - adds superjson serialization
+    transformer: superjson, //? optional - adds superjson serialization
   });
   const slug = context.params?.slug as string;
 
   const username = slug.replace("@", "");
 
-  // prefetch `post.byId`
+  //? prefetch `profiles.getUserByUsername`
   helpers.profiles.getUserByUsername.prefetch({ username });
 
   return {
