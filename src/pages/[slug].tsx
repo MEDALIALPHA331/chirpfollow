@@ -5,6 +5,7 @@ import type {
   NextPage,
 } from "next";
 import Head from "next/head";
+import Image from "next/image";
 import { api } from "~/utils/api";
 
 type PageProps = InferGetStaticPropsType<typeof getStaticProps>;
@@ -22,10 +23,22 @@ const ProfilePage: NextPage<PageProps> = ({ username }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex min-h-screen flex-col items-center justify-center">
-        Profile view
-        <div>{userProfile?.username}</div>
-      </main>
+      <PageLayout>
+        <div className="relative h-36 bg-slate-600">
+          <Image
+            src={userProfile?.profileImageUrl!}
+            width={128}
+            height={128}
+            alt={`${userProfile?.profileImageUrl} Profile Picture`}
+            className="absolute bottom-0 left-0 -mb-16 ml-4 rounded-full border-4 border-black bg-black"
+          />
+        </div>
+        <div id="spacer" className="p-8" />
+        <div className="p-4">
+          <h2 className="text-2xl">{`@${userProfile?.username}`}</h2>
+        </div>
+        <div className="w-full border-b border-slate-400" />
+      </PageLayout>
     </>
   );
 };
@@ -39,6 +52,7 @@ export default ProfilePage;
 
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
+import PageLayout from "~/components/Layout";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 
