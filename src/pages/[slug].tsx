@@ -6,7 +6,10 @@ import type {
 } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import PageLayout from "~/components/Layout";
+import PostView from "~/components/PostView";
 import { api } from "~/utils/api";
+import { LoadingScreen } from ".";
 
 const ProfileFeed = (props: { userId: string }) => {
   const { data: profileData, isLoading } = api.posts.getPostsByUserId.useQuery({
@@ -65,27 +68,12 @@ const ProfilePage: NextPage<PageProps> = ({ username }) => {
 
 export default ProfilePage;
 
-/**
- *  Prefetching data for the dynamic page from tRPC using GetStaticProps
- * @see https://trpc.io/docs/nextjs/ssg
- */
-
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import superjson from "superjson";
-import PageLayout from "~/components/Layout";
-import PostView from "~/components/PostView";
-import { appRouter } from "~/server/api/root";
-import { prisma } from "~/server/db";
-import { LoadingScreen } from ".";
+import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ slug: string }>
 ) {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: superjson, //? optional - adds superjson serialization
-  });
+  const helpers = generateSSGHelper();
   const slug = context.params?.slug as string;
 
   const username = slug.replace("@", "");
